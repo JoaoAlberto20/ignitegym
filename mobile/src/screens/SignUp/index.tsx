@@ -1,29 +1,46 @@
-import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
+import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { api } from "@services/api";
+import { useAuth } from "@hooks/useAuth";
+import { AppError } from "@utils/AppError";
+
 import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, Controller } from 'react-hook-form';
+
+import { VStack, Image, Text, Center, Heading, ScrollView, useToast } from "native-base";
+
+import { Input } from "@components/Input";
+import { Button } from "@components/Button";
 
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png';
 
-import { Input } from "@components/Input";
-import { Button } from "@components/Button";
-import { useNavigation } from "@react-navigation/native";
 
 const signUpSchema = yup.object({
-  name: yup.string().required('Informe o nome.'),
-  email: yup.string().email('E-mail invalido.').required('Informe o email.'),
-  password: yup.string().required('Informe a senha.').min(6, 'A senha deve ter pelo menos 6 números.'),
-  password_confirm: yup.string().required('Confirma a senha').oneOf([yup.ref('password'), null], 'A confirmação da senha não confere.'),
+  name: yup
+    .string()
+    .required('Informe o nome.'),
+  email: yup
+    .string()
+    .email('E-mail invalido.')
+    .required('Informe o email.'),
+  password: yup
+    .string()
+    .required('Informe a senha.')
+    .min(6, 'A senha deve ter pelo menos 6 números.'),
+  password_confirm: yup
+    .string()
+    .required('Confirma a senha')
+    .oneOf([yup.ref('password'), null], 'A confirmação da senha não confere.'),
 })
 
 type FormDataProps = yup.InferType<typeof signUpSchema>;
 
 export function SignUp() {
-  const navigation = useNavigation();
-
-  const handleGoBack = () => navigation.goBack();
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth()
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema),
@@ -32,12 +49,31 @@ export function SignUp() {
       email: '',
       password: '',
       password_confirm: ''
-    }
-  })
+    },
+  });
 
-  const handleSignUp = (data: FormDataProps) => {
-    console.log(data);
-  }
+  const navigation = useNavigation();
+  
+  const toast = useToast()
+
+  const handleGoBack = () => navigation.goBack();
+
+  const handleSignUp = async ({ name, email, password }: FormDataProps) => {
+    try {
+      setIsLoading(true);
+      await api.post('/users', { name, email, password });
+      await signIn(email, password); 
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError ? error.message : 'Não foi possível criar a conta. Tente novamente mais tarde';
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+      })
+      setIsLoading(false);
+    };
+  };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
@@ -116,6 +152,7 @@ export function SignUp() {
           <Button
             title="Criar e acessar"
             onPress={handleSubmit(handleSignUp)}
+            isLoading={isLoading}
           />
         </Center>
         <Button

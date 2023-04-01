@@ -28,7 +28,7 @@
 ```
 # Clone do repositório
 Faça o clone da aplicação
-$ git clone https://github.com/FilipeDiasLima/ignite-gym.git
+$ git clone git@github.com:JoaoAlberto20/ignitegym.git
 ```
 
 # More

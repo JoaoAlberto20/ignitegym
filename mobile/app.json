@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ignite-rn-03-ignite-gym",
-    "slug": "ignite-rn-03-ignite-gym",
+    "name": "ignitegym",
+    "slug": "ignitegym",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

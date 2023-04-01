@@ -1,4 +1,4 @@
-export type ExerciseDTO = {
+export type ExercisesDTO = {
   id: string;
   demo: string;
   group: string;
@@ -7,4 +7,4 @@ export type ExerciseDTO = {
   series: number;
   thumb: string;
   updated_at: string;
-}
+}; 
